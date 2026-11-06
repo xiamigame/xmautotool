@@ -1,0 +1,12 @@
+{
+  "gui.xmautotool.title": "自动工具",
+  "gui.xmautotool.policy_editor": "编辑策略",
+  "gui.xmautotool.profiles": "配置文件",
+  "gui.xmautotool.tool_overrides": "工具识别",
+  "gui.xmautotool.kinds": "工具类型",
+  "gui.xmautotool.settings": "自动工具设置",
+  "gui.xmautotool.pick_item": "选择物品",
+  "key.categories.xmautotool": "自动工具",
+  "key.xmautotool.open": "打开自动工具设置",
+  "key.xmautotool.suppress": "按住暂停自动切换"
+}

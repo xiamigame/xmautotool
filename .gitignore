@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+.gradle-home/
+build/
+out/
+
+# Run directories
+run/
+run-*/
+
+# Local tooling
+.tools/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+bin/
+.classpath
+.project
+.settings/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local ledgers (kept on disk, not tracked)
+docs/
+
+# Build intermediates / local leftovers
+*.class
+*.log
+logs/
+crash-reports/
+*.tmp
+*.bak

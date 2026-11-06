@@ -1,0 +1,32 @@
+// Aggregator build. The mod itself is assembled by one adapter subproject:
+//   .\gradlew.bat build                     -> adapter 1.18.2 (default)
+//   .\gradlew.bat build -Padapter=1.18.2    -> same, explicit
+plugins {
+    id 'base'
+}
+
+ext {
+    mod_id = providers.gradleProperty('mod_id').get()
+    mod_name = providers.gradleProperty('mod_name').get()
+    mod_license = providers.gradleProperty('mod_license').get()
+    mod_version = providers.gradleProperty('mod_version').get()
+    mod_group_id = providers.gradleProperty('mod_group_id').get()
+    mod_authors = providers.gradleProperty('mod_authors').get()
+    mod_description = providers.gradleProperty('mod_description').get()
+}
+
+def selectedAdapter = providers.gradleProperty('adapter').getOrElse('1_18_2')
+
+tasks.named('build') {
+    dependsOn ':common:check'
+    dependsOn ":adapter:${selectedAdapter}:build"
+}
+
+tasks.register('test') {
+    dependsOn ':common:test'
+}
+
+tasks.named('clean') {
+    dependsOn ':common:clean'
+    dependsOn ":adapter:${selectedAdapter}:clean"
+}

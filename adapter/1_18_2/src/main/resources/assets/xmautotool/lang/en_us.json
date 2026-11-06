@@ -1,0 +1,12 @@
+{
+  "gui.xmautotool.title": "XMAutoTool",
+  "gui.xmautotool.policy_editor": "Edit policy",
+  "gui.xmautotool.profiles": "Profiles",
+  "gui.xmautotool.tool_overrides": "Tool recognition",
+  "gui.xmautotool.kinds": "Tool kinds",
+  "gui.xmautotool.settings": "XMAutoTool settings",
+  "gui.xmautotool.pick_item": "Pick item",
+  "key.categories.xmautotool": "XMAutoTool",
+  "key.xmautotool.open": "Open XMAutoTool",
+  "key.xmautotool.suppress": "Hold to Pause Auto-Switch"
+}
