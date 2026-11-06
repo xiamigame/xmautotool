@@ -10,13 +10,12 @@ permissions:
 
 jobs:
   build:
-    name: build adapter ${{ matrix.adapter }}
+    name: build adapter
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        adapter:
-          - '1_18_2'
+    outputs:
+      mod: ${{ steps.tag.outputs.mod }}
+      adapter: ${{ steps.tag.outputs.adapter }}
+      mc: ${{ steps.tag.outputs.mc }}
     steps:
       - uses: actions/checkout@v4
 
@@ -26,16 +25,40 @@ jobs:
           java-version: '17'
           cache: gradle
 
+      - name: Parse tag
+        id: tag
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-([0-9]+_[0-9]+(_[0-9]+)?)$ ]]; then
+            echo "::error::tag must be v<mod-version>-<mc-version>, e.g. v0.3.0-1.18.2"
+            exit 1
+          fi
+          mod="${BASH_REMATCH[1]}"
+          adapter="${BASH_REMATCH[2]}"
+          if [[ ! -f "adapter/${adapter}/build.gradle" ]]; then
+            echo "::error::adapter/${adapter} does not exist in this commit"
+            exit 1
+          fi
+          actual="$(grep -E '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')"
+          if [[ "$mod" != "$actual" ]]; then
+            echo "::error::tag mod version ${mod} does not match gradle.properties ${actual}"
+            exit 1
+          fi
+          mc="${adapter//_/.}"
+          echo "mod=${mod}" >> "$GITHUB_OUTPUT"
+          echo "adapter=${adapter}" >> "$GITHUB_OUTPUT"
+          echo "mc=${mc}" >> "$GITHUB_OUTPUT"
+
       - name: Test common
         run: ./gradlew :common:test --no-daemon
 
       - name: Build adapter
-        run: ./gradlew :adapter:${{ matrix.adapter }}:build --no-daemon
+        run: ./gradlew :adapter:${{ steps.tag.outputs.adapter }}:build --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
-          name: xmautotool-${{ matrix.adapter }}
-          path: adapter/${{ matrix.adapter }}/build/libs/*.jar
+          name: xmautotool-${{ steps.tag.outputs.adapter }}
+          path: adapter/${{ steps.tag.outputs.adapter }}/build/libs/*.jar
           if-no-files-found: error
 
   release:
@@ -43,6 +66,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
         with:
           path: dist
@@ -50,5 +75,17 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
+          name: "XMAutoTool ${{ needs.build.outputs.mod }} (Minecraft ${{ needs.build.outputs.mc }})"
+          body: "Minecraft ${{ needs.build.outputs.mc }} build of XMAutoTool ${{ needs.build.outputs.mod }}."
           files: dist/*.jar
-          generate_release_notes: true
+          generate_release_notes: false
+
+      # One-off migration: the first release was published as v0.3.0 before the
+      # per-Minecraft-version tag scheme existed. Only this exact tag runs it.
+      - name: Remove legacy v0.3.0 release
+        if: github.ref_name == 'v0.3.0-1.18.2'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete v0.3.0 --yes --cleanup-tag || true
+          git push origin :refs/tags/v0.3.0 || true

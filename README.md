@@ -88,7 +88,7 @@ $env:GRADLE_OPTS = '-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=7890 -Dhttp.pr
 ## 文档与仓库
 
 - `AGENTS.md`：协作规则，纳入版本控制。
-- `RELEASING.md`：版本号、分支、tag、GitHub Release 与热修流程。
+- `RELEASING.md`：发布规则。tag 形如 `v0.3.0-1.18.2`，每个 MC 版本一个 release。
 - `docs/`（含 UI 迭代台账与会话计划）仅本地保留，已在 `.gitignore` 中忽略。
 - 构建产物（`build/`）、Gradle 缓存（`.gradle/`、`.gradle-home/`）、日志与临时文件同样不纳入仓库。
 - 设计说明已并入游戏内「说明」页与 README；不再保留独立设计稿。
