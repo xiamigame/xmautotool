@@ -29,12 +29,18 @@ jobs:
         id: tag
         run: |
           tag="${GITHUB_REF_NAME}"
-          if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-([0-9]+_[0-9]+(_[0-9]+)?)$ ]]; then
+          if [[ "$tag" != v*-* ]]; then
             echo "::error::tag must be v<mod-version>-<mc-version>, e.g. v0.3.0-1.18.2"
             exit 1
           fi
-          mod="${BASH_REMATCH[1]}"
-          adapter="${BASH_REMATCH[2]}"
+          rest="${tag#v}"
+          mod="${rest%%-*}"
+          mc="${rest#*-}"
+          if [[ ! "$mod" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || [[ ! "$mc" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "::error::tag must be v<mod-version>-<mc-version>, e.g. v0.3.0-1.18.2"
+            exit 1
+          fi
+          adapter="${mc//./_}"
           if [[ ! -f "adapter/${adapter}/build.gradle" ]]; then
             echo "::error::adapter/${adapter} does not exist in this commit"
             exit 1
@@ -44,7 +50,6 @@ jobs:
             echo "::error::tag mod version ${mod} does not match gradle.properties ${actual}"
             exit 1
           fi
-          mc="${adapter//_/.}"
           echo "mod=${mod}" >> "$GITHUB_OUTPUT"
           echo "adapter=${adapter}" >> "$GITHUB_OUTPUT"
           echo "mc=${mc}" >> "$GITHUB_OUTPUT"
